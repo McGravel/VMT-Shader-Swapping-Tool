@@ -5,12 +5,13 @@
 #include <sstream>
 #include <string>
 
-constexpr auto APPLICATION_TITLE = "Parallax Cubemap VMT Tool v0.3";
+constexpr auto APPLICATION_TITLE = "Parallax Cubemap VMT Tool v0.4";
 // It's 0.3 because this is the 3rd proper "version" of sorts:
 // 0.1 was the initial working tool which could open a file and create the complementary VMT
 // 0.2 was multiple files
 // 0.3 fixed a problem where the program would exit on an invalid file instead of continuing
-// No changelog or anything because this isn't THAT important lol but if it goes on then yeah this'll go somewhere else
+// 0.4 is some code cleanup and a bit of const here and there
+// No changelog or anything because this isn't THAT important but if it goes on then this'll go somewhere else
 
 enum class EMessagePrefix
 {
