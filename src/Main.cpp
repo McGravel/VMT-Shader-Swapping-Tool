@@ -42,8 +42,7 @@ void CreateVmtFile(std::string const &strExportPath, const std::stringstream &is
     // TODO: Remove existing suffix from input file!!!
     // Actually maybe not, maybe just tell people about the suffix in the Usage dialog?
 
-    // I could only get this to work with *& and i am too tired to understand why that is
-    std::string strOutputDestination = *&strExportPath;
+    std::string strOutputDestination = strExportPath;
 
     if (bIsPccFile)
     {
@@ -134,6 +133,7 @@ int main(int argc, char *argv[])
             ifVmtFile.close();
 
             // Code snippets that hopefully remove the quotes and whitespace, this is ridiculous for such a simple thing tbh
+            // TODO: Look into algorithms/etc that may be better?
             strFirstLine.erase(std::remove(strFirstLine.begin(), strFirstLine.end(), '\"'), strFirstLine.end());
             strFirstLine.erase(std::remove_if(strFirstLine.begin(), strFirstLine.end(), isspace), strFirstLine.end());
 
@@ -154,7 +154,6 @@ int main(int argc, char *argv[])
             {
                 // TODO: Make user specify?
                 PrintLine("Failed - Expected SDK_LightmappedGeneric or LightmappedGeneric as first line in file.",
-
                           EMessagePrefix::Err);
                 continue;
             }
