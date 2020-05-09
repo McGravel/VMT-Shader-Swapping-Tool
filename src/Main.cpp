@@ -13,7 +13,6 @@ constexpr auto APPLICATION_TITLE = "Parallax Cubemap VMT Tool v0.3";
 // 0.3 fixed a problem where the program would exit on an invalid file instead of continuing
 // No changelog or anything because this isn't THAT important lol but if it goes on then yeah this'll go somewhere else
 
-// Shut up Visual Studio please, I'll make it an enum class, okay!
 enum class EMessagePrefix
 {
     None,
@@ -74,7 +73,6 @@ void CreateVmtFile(std::string const &strExportPath, const std::stringstream &is
 
 int main(int argc, char *argv[])
 {
-    // We're a real application now boys
     PrintLine(APPLICATION_TITLE);
     if (argc < 2)
     {
