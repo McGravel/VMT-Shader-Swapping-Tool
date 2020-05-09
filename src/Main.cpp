@@ -1,4 +1,3 @@
-// Do I need all of these? Are there more specific includes I could be using again? Answers on a postcard.
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
@@ -21,7 +20,7 @@ enum class EMessagePrefix
 };
 
 // TODO: Better way of doing this? Classes? Using one of the Map things to assign a string to enums?
-void PrintLine(std::string const &strToPrint, EMessagePrefix eMsgPrefix = EMessagePrefix::None)
+void PrintLine(const std::string &strToPrint, EMessagePrefix eMsgPrefix = EMessagePrefix::None)
 {
     if (eMsgPrefix == EMessagePrefix::None)
     {
@@ -37,10 +36,9 @@ void PrintLine(std::string const &strToPrint, EMessagePrefix eMsgPrefix = EMessa
     }
 }
 
-void CreateVmtFile(std::string const &strExportPath, const std::stringstream &isRestOfVmt, bool bIsPccFile)
+void CreateVmtFile(const std::string &strExportPath, const std::stringstream &isRestOfVmt, const bool &bIsPccFile)
 {
-    // TODO: Remove existing suffix from input file!!!
-    // Actually maybe not, maybe just tell people about the suffix in the Usage dialog?
+    // TODO: Remove existing suffix from input file? Maybe just tell people about the suffix in the Usage dialog?
 
     std::string strOutputDestination = strExportPath;
 
@@ -86,8 +84,9 @@ int main(int argc, char *argv[])
     for (int i = 1; i < argc; i++)
     {
         PrintLine("Argument " + std::to_string(i) + ": " + argv[i]);
-        // Messing about with filesystem to figure out paths, this may be a poor way of doing it but it's my first time with
-        // files in C++, idk any prefix for a path object for variable naming so i just used "path" as the prefix
+
+        // Messing about with filesystem to figure out paths
+        // This may be a poor way of doing it but it's my first time with files in C++
         std::filesystem::path pathFilesystemInputPath{ argv[i] };
 
         // Change path to str to allow it to be passed into existing code
@@ -140,6 +139,7 @@ int main(int argc, char *argv[])
             // Snippet found online, the ::tolower part is quite interesting
             std::transform(strFirstLine.begin(), strFirstLine.end(), strFirstLine.begin(), ::tolower);
 
+            // TODO: Any algorithms etc for better checking than this? Is the current solution okay?
             bool bExportingPccFile = true;
             if (strFirstLine == "sdk_lightmappedgeneric")
             {
