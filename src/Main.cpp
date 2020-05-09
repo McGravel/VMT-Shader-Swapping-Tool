@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
-                    isRestOfFile << str << std::endl;
+                    isRestOfFile << str << "\n";
                 }
             }
             ifVmtFile.close();
@@ -147,17 +147,17 @@ int main(int argc, char *argv[])
             bool bExportingPccFile = true;
             if (strFirstLine == "sdk_lightmappedgeneric")
             {
-                PrintLine("Got PCC Version (SDK_LightmappedGeneric)");
+                PrintLine("Found SDK_LightmappedGeneric");
                 bExportingPccFile = false;
             }
             else if (strFirstLine == "lightmappedgeneric")
             {
-                PrintLine("Detected LightmappedGeneric");
+                PrintLine("Found LightmappedGeneric");
             }
             else
             {
                 // TODO: Make user specify?
-                PrintLine("Failed - Expected SDK_LightmappedGeneric or LightmappedGeneric as first line in file.",
+                PrintLine("Expected SDK_LightmappedGeneric or LightmappedGeneric as first line in file.",
                           EMessagePrefix::Err);
                 continue;
             }
