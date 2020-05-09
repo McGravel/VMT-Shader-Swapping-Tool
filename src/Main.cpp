@@ -157,8 +157,7 @@ int main(int argc, char *argv[])
             else
             {
                 // TODO: Make user specify?
-                PrintLine("Expected SDK_LightmappedGeneric or LightmappedGeneric as first line in file.",
-                          EMessagePrefix::Err);
+                PrintLine("Expected SDK_LightmappedGeneric or LightmappedGeneric as first line in file.", EMessagePrefix::Err);
                 continue;
             }
 
