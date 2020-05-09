@@ -68,6 +68,19 @@ void CreateVmtFile(const std::string &strExportPath, const std::stringstream &is
     ofNewVmtFile.close();
 }
 
+// TODO: Look at <filesystem> for potentially better ways of doing this
+std::string MakeExportPathString(std::filesystem::path inputPath)
+{
+    // Get filename explicitly, no path or extension via stem()
+    std::string strFileNameNoExtension(inputPath.stem().string());
+
+    // Get path through removing filename from it - i'm just trying these things out and keeping them if they seem useful
+    std::string strPathNoFileName(inputPath.remove_filename().string());
+
+    // I suppose this is one way of making the path
+    return (strPathNoFileName + strFileNameNoExtension);
+}
+
 int main(int argc, char *argv[])
 {
     PrintLine(APPLICATION_TITLE);
@@ -97,15 +110,6 @@ int main(int argc, char *argv[])
             PrintLine("Empty path specified.", EMessagePrefix::Err);
             continue;
         }
-
-        // Get filename explicitly, no path or extension via stem()
-        std::string strFileNameNoExtension(pathFilesystemInputPath.stem().string());
-
-        // Get path through removing filename from it - i'm just trying these things out and keeping them if they seem useful
-        std::string strPathNoFileName(pathFilesystemInputPath.remove_filename().string());
-
-        // I suppose this is one way of making the path
-        std::string strExportDestination(strPathNoFileName + strFileNameNoExtension);
 
         std::ifstream ifVmtFile(strInputPath);
         if (ifVmtFile.is_open())
@@ -158,7 +162,7 @@ int main(int argc, char *argv[])
                 continue;
             }
 
-            CreateVmtFile(strExportDestination, isRestOfFile, bExportingPccFile);
+            CreateVmtFile(MakeExportPathString(pathFilesystemInputPath), isRestOfFile, bExportingPccFile);
         }
         else
         {
