@@ -338,3 +338,9 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+# CUSTOM
+
+# Ignore CPPCheck stuff I was looking at
+vmt_tool-cppcheck-build-dir
+*.cppcheck

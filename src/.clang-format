@@ -1,0 +1,36 @@
+# Format Style Options - Created with Clang Power Tools
+---
+Language: Cpp
+AccessModifierOffset: -4
+AlignAfterOpenBracket: Align
+AlignOperands: true
+AllowShortLambdasOnASingleLine: All
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: Never
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBraces : Allman
+BreakInheritanceList: AfterColon
+ColumnLimit: 128
+Cpp11BracedListStyle: false
+DerivePointerAlignment: true
+IndentPPDirectives: None
+IndentWidth : 4
+PenaltyBreakAssignment : 10
+PenaltyBreakBeforeFirstCallParameter : 30
+PenaltyBreakComment: 10
+PenaltyBreakString: 10
+PenaltyExcessCharacter: 100
+SortIncludes: true
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 1
+SpacesInAngles: false
+TabWidth: 8
+UseTab: Never
+...
