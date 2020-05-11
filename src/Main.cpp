@@ -58,7 +58,8 @@ std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string 
     return strExportPath + "_error.vmt";
 }
 
-void CreateVmtFile(const std::string &strExportPath, const std::stringstream &isRestOfVmt, const EDetectedShader &eShaderType)
+// Creates a new VMT file with the first line changed; returns boolean to try and signify this worked as expected
+bool CreateVmtFile(const std::string &strExportPath, const std::stringstream &isRestOfVmt, const EDetectedShader &eShaderType)
 {
     // TODO: Remove existing suffix from input file? Maybe just tell people about the suffix in the Usage dialog?
 
@@ -72,9 +73,18 @@ void CreateVmtFile(const std::string &strExportPath, const std::stringstream &is
     {
         ofNewVmtFile << "\"LightmappedGeneric\"\n";
     }
+    else
+    {
+        // An unknown shader was passed in so close it firstly then return false to signify error
+        PrintLine("Tried to create VMT file with invalid Shader!", EMessagePrefix::Err);
+        ofNewVmtFile.close();
+        // TODO: Delete this file instead of leaving an invalid/empty one?
+        return false;
+    }
 
     ofNewVmtFile << isRestOfVmt.rdbuf();
     ofNewVmtFile.close();
+    return true;
 }
 
 // I suppose this is one way of making the path
@@ -118,6 +128,7 @@ void ReadLinesFromFile(std::ifstream &ifVmtFile, std::stringstream &isRestOfFile
     ifVmtFile.close();
 }
 
+// This function will transform the string to allow for easier use by DetectFileShader() and potentially elsewhere
 void ValidateShaderName(std::string &strFirstLine)
 {
     // Code snippets that hopefully remove the quotes and whitespace, this is ridiculous for such a simple thing tbh
@@ -145,6 +156,7 @@ int main(int argc, char *argv[])
 
     // For loop to iterate each input file, it's a big one
     // TODO: Break this up further?
+    int iSuccessfulFileWrites = 0;
     for (int i = 1; i < argc; i++)
     {
         PrintLine("Argument " + std::to_string(i) + ": " + argv[i]);
@@ -179,7 +191,11 @@ int main(int argc, char *argv[])
 
             if (eFoundShader != EDetectedShader::None)
             {
-                CreateVmtFile(MakeExportPathString(pathFilesystemInputPath), isRestOfFile, eFoundShader);
+                // CreateVmtFile returns a bool to try and ensure the amount of successful file writes shown is correct
+                if (CreateVmtFile(MakeExportPathString(pathFilesystemInputPath), isRestOfFile, eFoundShader))
+                {
+                    iSuccessfulFileWrites++;
+                }
             }
         }
         else
@@ -188,4 +204,5 @@ int main(int argc, char *argv[])
             PrintLine("Couldn't Open File: " + strInputPath, EMessagePrefix::Err);
         }
     }
+    PrintLine(std::to_string(iSuccessfulFileWrites) + "/" + std::to_string(argc - 1) + " Files Written");
 }
