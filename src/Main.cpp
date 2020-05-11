@@ -52,13 +52,10 @@ std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string 
         return strExportPath + "_no_pcc.vmt";
     }
     // FIXME: I get a warning about some paths not returning, so I am going to place an assert here at this time
-    else
-    {
-        assert(0 && "An invalid shader was passed into the Suffix function!");
-        // I was going to return a nullptr but as this is used inside an ofstream i will play it safe
-        // and just pass a string back with 'error' in it to indicate something has gone wrong :V
-        return strExportPath + "_error.vmt";
-    }
+    assert(0 && "An invalid shader was passed into the Suffix function!");
+    // I was going to return a nullptr but as this is used inside an ofstream i will play it safe
+    // and just pass a string back with 'error' in it to indicate something has gone wrong :V
+    return strExportPath + "_error.vmt";
 }
 
 void CreateVmtFile(const std::string &strExportPath, const std::stringstream &isRestOfVmt, const EDetectedShader &eShaderType)
