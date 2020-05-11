@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <cassert>
 
 constexpr auto APPLICATION_TITLE = "Parallax Cubemap VMT Tool v0.4";
 // It's 0.5 because this is the 3rd proper "version" of sorts:
@@ -45,24 +46,33 @@ void PrintLine(const std::string &strToPrint, EMessagePrefix eMsgPrefix = EMessa
     }
 }
 
+std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string &strExportPath)
+{
+    if (eShaderType == EDetectedShader::LightmappedGeneric)
+    {
+        PrintLine("Exporting PCC (SDK_LightmappedGeneric): " + strExportPath + "_pcc.vmt");
+        return strExportPath + "_pcc.vmt";
+    }
+    if (eShaderType == EDetectedShader::SDK_LightmappedGeneric)
+    {
+        PrintLine("Exporting Regular LightmappedGeneric: " + strExportPath + "_no_pcc.vmt");
+        return strExportPath + "_no_pcc.vmt";
+    }
+    // FIXME: I get a warning about some paths not returning, so I am going to place an assert here at this time
+    else
+    {
+        assert(0 && "An invalid shader was passed into the Suffix function!");
+        // I was going to return a nullptr but as this is used inside an ofstream i will play it safe
+        // and just pass a string back with 'error' in it to indicate something has gone wrong :V
+        return strExportPath + "_error.vmt";
+    }
+}
+
 void CreateVmtFile(const std::string &strExportPath, const std::stringstream &isRestOfVmt, const EDetectedShader &eShaderType)
 {
     // TODO: Remove existing suffix from input file? Maybe just tell people about the suffix in the Usage dialog?
 
-    std::string strOutputDestination = strExportPath;
-
-    if (eShaderType == EDetectedShader::LightmappedGeneric)
-    {
-        strOutputDestination += "_pcc.vmt";
-        PrintLine("Exporting PCC (SDK_LightmappedGeneric): " + strOutputDestination);
-    }
-    else if (eShaderType == EDetectedShader::SDK_LightmappedGeneric)
-    {
-        strOutputDestination += "_no_pcc.vmt";
-        PrintLine("Exporting Regular LightmappedGeneric: " + strOutputDestination);
-    }
-
-    std::ofstream ofNewVmtFile(strOutputDestination);
+    std::ofstream ofNewVmtFile(SetFileSuffix(eShaderType, strExportPath));
 
     if (eShaderType == EDetectedShader::LightmappedGeneric)
     {
@@ -87,7 +97,7 @@ std::string MakeExportPathString(std::filesystem::path inputPath)
     // Get path through removing filename from it - i'm just trying these things out and keeping them if they seem useful
     std::string strPathNoFileName(inputPath.remove_filename().string());
 
-    return (strPathNoFileName + strFileNameNoExtension);
+    return strPathNoFileName + strFileNameNoExtension;
 }
 
 // TODO: Any algorithms etc for better checking than this? Is the current solution okay?
@@ -98,17 +108,15 @@ EDetectedShader DetectFileShader(std::string &strFirstLine)
         PrintLine("Found SDK_LightmappedGeneric");
         return EDetectedShader::SDK_LightmappedGeneric;
     }
-    else if (strFirstLine == "lightmappedgeneric")
+    if (strFirstLine == "lightmappedgeneric")
     {
         PrintLine("Found LightmappedGeneric");
         return EDetectedShader::LightmappedGeneric;
     }
-    else
-    {
-        // TODO: Make user specify?
-        PrintLine("Expected SDK_LightmappedGeneric or LightmappedGeneric as first line in file.", EMessagePrefix::Err);
-        return EDetectedShader::None;
-    }
+
+    // TODO: Make user specify?
+    PrintLine("Expected SDK_LightmappedGeneric or LightmappedGeneric as first line in file.", EMessagePrefix::Err);
+    return EDetectedShader::None;
 }
 
 int main(int argc, char *argv[])
