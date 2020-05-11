@@ -159,8 +159,11 @@ int main(int argc, char *argv[])
             strFirstLine.erase(std::remove(strFirstLine.begin(), strFirstLine.end(), '\"'), strFirstLine.end());
             strFirstLine.erase(std::remove_if(strFirstLine.begin(), strFirstLine.end(), isspace), strFirstLine.end());
 
+#pragma warning(push)
+#pragma warning(disable: 4244)
             // Snippet found online, the ::tolower part is quite interesting
             std::transform(strFirstLine.begin(), strFirstLine.end(), strFirstLine.begin(), ::tolower);
+#pragma warning(pop)
 
             EDetectedShader eFoundShader = DetectFileShader(strFirstLine);
 
