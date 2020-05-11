@@ -20,6 +20,13 @@ enum class EMessagePrefix
     Err
 };
 
+enum class EDetectedShader
+{
+    None,
+    LightmappedGeneric,
+    SDK_LightmappedGeneric
+};
+
 // TODO: Better way of doing this? Classes? Using one of the Map things to assign a string to enums?
 void PrintLine(const std::string &strToPrint, EMessagePrefix eMsgPrefix = EMessagePrefix::None)
 {
@@ -37,18 +44,18 @@ void PrintLine(const std::string &strToPrint, EMessagePrefix eMsgPrefix = EMessa
     }
 }
 
-void CreateVmtFile(const std::string &strExportPath, const std::stringstream &isRestOfVmt, const bool &bIsPccFile)
+void CreateVmtFile(const std::string &strExportPath, const std::stringstream &isRestOfVmt, const EDetectedShader &eShaderType)
 {
     // TODO: Remove existing suffix from input file? Maybe just tell people about the suffix in the Usage dialog?
 
     std::string strOutputDestination = strExportPath;
 
-    if (bIsPccFile)
+    if (eShaderType == EDetectedShader::LightmappedGeneric)
     {
         strOutputDestination += "_pcc.vmt";
         PrintLine("Exporting PCC (SDK_LightmappedGeneric): " + strOutputDestination);
     }
-    else
+    else if (eShaderType == EDetectedShader::SDK_LightmappedGeneric)
     {
         strOutputDestination += "_no_pcc.vmt";
         PrintLine("Exporting Regular LightmappedGeneric: " + strOutputDestination);
@@ -56,11 +63,11 @@ void CreateVmtFile(const std::string &strExportPath, const std::stringstream &is
 
     std::ofstream ofNewVmtFile(strOutputDestination);
 
-    if (bIsPccFile)
+    if (eShaderType == EDetectedShader::LightmappedGeneric)
     {
         ofNewVmtFile << "\"SDK_LightmappedGeneric\"\n";
     }
-    else
+    else if (eShaderType == EDetectedShader::SDK_LightmappedGeneric)
     {
         ofNewVmtFile << "\"LightmappedGeneric\"\n";
     }
@@ -80,6 +87,27 @@ std::string MakeExportPathString(std::filesystem::path inputPath)
 
     // I suppose this is one way of making the path
     return (strPathNoFileName + strFileNameNoExtension);
+}
+
+// TODO: Any algorithms etc for better checking than this? Is the current solution okay?
+EDetectedShader DetectFileShader(std::string &strFirstLine)
+{
+    if (strFirstLine == "sdk_lightmappedgeneric")
+    {
+        PrintLine("Found SDK_LightmappedGeneric");
+        return EDetectedShader::SDK_LightmappedGeneric;
+    }
+    else if (strFirstLine == "lightmappedgeneric")
+    {
+        PrintLine("Found LightmappedGeneric");
+        return EDetectedShader::LightmappedGeneric;
+    }
+    else
+    {
+        // TODO: Make user specify?
+        PrintLine("Expected SDK_LightmappedGeneric or LightmappedGeneric as first line in file.", EMessagePrefix::Err);
+        return EDetectedShader::None;
+    }
 }
 
 int main(int argc, char *argv[])
@@ -133,25 +161,9 @@ int main(int argc, char *argv[])
             // Snippet found online, the ::tolower part is quite interesting
             std::transform(strFirstLine.begin(), strFirstLine.end(), strFirstLine.begin(), ::tolower);
 
-            // TODO: Any algorithms etc for better checking than this? Is the current solution okay?
-            bool bExportingPccFile = true;
-            if (strFirstLine == "sdk_lightmappedgeneric")
-            {
-                PrintLine("Found SDK_LightmappedGeneric");
-                bExportingPccFile = false;
-            }
-            else if (strFirstLine == "lightmappedgeneric")
-            {
-                PrintLine("Found LightmappedGeneric");
-            }
-            else
-            {
-                // TODO: Make user specify?
-                PrintLine("Expected SDK_LightmappedGeneric or LightmappedGeneric as first line in file.", EMessagePrefix::Err);
-                continue;
-            }
+            EDetectedShader eFoundShader = DetectFileShader(strFirstLine);
 
-            CreateVmtFile(MakeExportPathString(pathFilesystemInputPath), isRestOfFile, bExportingPccFile);
+            CreateVmtFile(MakeExportPathString(pathFilesystemInputPath), isRestOfFile, eFoundShader);
         }
         else
         {
