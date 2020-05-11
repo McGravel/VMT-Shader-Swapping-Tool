@@ -64,7 +64,15 @@ bool CreateVmtFile(const std::string &strExportPath, const std::stringstream &is
 {
     // TODO: Remove existing suffix from input file? Maybe just tell people about the suffix in the Usage dialog?
 
-    std::ofstream ofNewVmtFile(SetFileSuffix(eShaderType, strExportPath));
+    // This is the one place I can put this without messages being duplicated for now
+    // TODO: We need to ask the user in this case if this is what they want
+    std::string strOutputPath = SetFileSuffix(eShaderType, strExportPath);
+    if (std::filesystem::exists(strOutputPath))
+    {
+        PrintLine("Overwriting an existing file!", EMessagePrefix::Warn);
+    }
+
+    std::ofstream ofNewVmtFile(strOutputPath);
 
     if (eShaderType == EDetectedShader::LightmappedGeneric)
     {
@@ -190,7 +198,7 @@ int main(int argc, char *argv[])
 
             EDetectedShader eFoundShader = DetectFileShader(strFirstLine);
 
-            // TODO: Seems like there's a bit of if nesting going on
+            // TODO: Seems like there's a bit of if() nesting going on
             // Do all these called functions really need to check as much as they currently are? See CreateVmtFile
             if (eFoundShader != EDetectedShader::None)
             {
