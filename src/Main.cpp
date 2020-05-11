@@ -6,12 +6,13 @@
 #include <string>
 
 constexpr auto APPLICATION_TITLE = "Parallax Cubemap VMT Tool v0.4";
-// It's 0.3 because this is the 3rd proper "version" of sorts:
+// It's 0.5 because this is the 3rd proper "version" of sorts:
 // 0.1 was the initial working tool which could open a file and create the complementary VMT
 // 0.2 was multiple files
 // 0.3 fixed a problem where the program would exit on an invalid file instead of continuing
 // 0.4 is some code cleanup and a bit of const here and there
-// No changelog or anything because this isn't THAT important but if it goes on then this'll go somewhere else
+// 0.5 is further code cleanup and breaking up into more functions
+// TODO: changelog instead of this block of text
 
 enum class EMessagePrefix
 {
@@ -76,6 +77,7 @@ void CreateVmtFile(const std::string &strExportPath, const std::stringstream &is
     ofNewVmtFile.close();
 }
 
+// I suppose this is one way of making the path
 // TODO: Look at <filesystem> for potentially better ways of doing this
 std::string MakeExportPathString(std::filesystem::path inputPath)
 {
@@ -85,7 +87,6 @@ std::string MakeExportPathString(std::filesystem::path inputPath)
     // Get path through removing filename from it - i'm just trying these things out and keeping them if they seem useful
     std::string strPathNoFileName(inputPath.remove_filename().string());
 
-    // I suppose this is one way of making the path
     return (strPathNoFileName + strFileNameNoExtension);
 }
 
@@ -163,7 +164,10 @@ int main(int argc, char *argv[])
 
             EDetectedShader eFoundShader = DetectFileShader(strFirstLine);
 
-            CreateVmtFile(MakeExportPathString(pathFilesystemInputPath), isRestOfFile, eFoundShader);
+            if (eFoundShader != EDetectedShader::None)
+            {
+                CreateVmtFile(MakeExportPathString(pathFilesystemInputPath), isRestOfFile, eFoundShader);
+            }
         }
         else
         {
