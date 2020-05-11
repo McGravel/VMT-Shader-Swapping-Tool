@@ -1,10 +1,10 @@
 #include <algorithm>
+#include <cassert>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <cassert>
 
 constexpr auto APPLICATION_TITLE = "Parallax Cubemap VMT Tool v0.5";
 
@@ -109,6 +109,15 @@ EDetectedShader DetectFileShader(std::string &strFirstLine)
     return EDetectedShader::None;
 }
 
+void ReadLinesFromFile(std::ifstream &ifVmtFile, std::stringstream &isRestOfFile)
+{
+    for (std::string str; std::getline(ifVmtFile, str);)
+    {
+        isRestOfFile << str << "\n";
+    }
+    ifVmtFile.close();
+}
+
 int main(int argc, char *argv[])
 {
     PrintLine(APPLICATION_TITLE);
@@ -146,22 +155,7 @@ int main(int argc, char *argv[])
             std::getline(ifVmtFile, strFirstLine);
 
             std::stringstream isRestOfFile;
-            for (std::string str; std::getline(ifVmtFile, str);)
-            {
-                isRestOfFile << str << "\n";
-            }
-            ifVmtFile.close();
-
-            // Code snippets that hopefully remove the quotes and whitespace, this is ridiculous for such a simple thing tbh
-            // TODO: Look into algorithms/etc that may be better?
-            strFirstLine.erase(std::remove(strFirstLine.begin(), strFirstLine.end(), '\"'), strFirstLine.end());
-            strFirstLine.erase(std::remove_if(strFirstLine.begin(), strFirstLine.end(), isspace), strFirstLine.end());
-
-#pragma warning(push)
-#pragma warning(disable: 4244)
-            // Snippet found online, the ::tolower part is quite interesting
-            std::transform(strFirstLine.begin(), strFirstLine.end(), strFirstLine.begin(), ::tolower);
-#pragma warning(pop)
+            ReadLinesFromFile(ifVmtFile, isRestOfFile);
 
             EDetectedShader eFoundShader = DetectFileShader(strFirstLine);
 
