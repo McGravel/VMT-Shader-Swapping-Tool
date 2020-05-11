@@ -92,15 +92,13 @@ int main(int argc, char *argv[])
         exit(0);
     }
 
-    // In an attempt to make this program support multiple files (not folders atm) I just put the whole thing in a for loop
-    // And it works, so once again, it could likely be done much better but regardless it seems to function as intended
-    // Maybe this tool could be much faster but given its simplicity it likely is sufficient as-is
+    // For loop to iterate each input file, it's a big one
+    // TODO: Break this up further?
     for (int i = 1; i < argc; i++)
     {
         PrintLine("Argument " + std::to_string(i) + ": " + argv[i]);
 
         // Messing about with filesystem to figure out paths
-        // This may be a poor way of doing it but it's my first time with files in C++
         std::filesystem::path pathFilesystemInputPath{ argv[i] };
 
         // Change path to str to allow it to be passed into existing code
@@ -117,22 +115,13 @@ int main(int argc, char *argv[])
         {
             PrintLine("Successfully Opened: " + strInputPath);
 
-            bool bReadingFirstLine = true;
             std::string strFirstLine;
+            std::getline(ifVmtFile, strFirstLine);
+
             std::stringstream isRestOfFile;
-            // Read the file line-by-line, which is one way of getting the first line exclusively to check which Shader is used
-            // TODO: Can we getline() for just the first line, then just get the rest in one go?
             for (std::string str; std::getline(ifVmtFile, str);)
             {
-                if (bReadingFirstLine)
-                {
-                    strFirstLine = str;
-                    bReadingFirstLine = false;
-                }
-                else
-                {
-                    isRestOfFile << str << "\n";
-                }
+                isRestOfFile << str << "\n";
             }
             ifVmtFile.close();
 
