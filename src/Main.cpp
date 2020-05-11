@@ -118,6 +118,20 @@ void ReadLinesFromFile(std::ifstream &ifVmtFile, std::stringstream &isRestOfFile
     ifVmtFile.close();
 }
 
+void ValidateShaderName(std::string &strFirstLine)
+{
+    // Code snippets that hopefully remove the quotes and whitespace, this is ridiculous for such a simple thing tbh
+    // TODO: Look into algorithms/etc that may be better?
+    strFirstLine.erase(std::remove(strFirstLine.begin(), strFirstLine.end(), '\"'), strFirstLine.end());
+    strFirstLine.erase(std::remove_if(strFirstLine.begin(), strFirstLine.end(), isspace), strFirstLine.end());
+
+#pragma warning(push)
+#pragma warning(disable : 4244)
+    // Snippet found online, the ::tolower part is quite interesting
+    std::transform(strFirstLine.begin(), strFirstLine.end(), strFirstLine.begin(), ::tolower);
+#pragma warning(pop)
+}
+
 int main(int argc, char *argv[])
 {
     PrintLine(APPLICATION_TITLE);
@@ -125,6 +139,7 @@ int main(int argc, char *argv[])
     {
         PrintLine("Sorry, you need to pass a path via the command line or drag-and-drop!\n", EMessagePrefix::Err);
         PrintLine("Usage:\nTo specify a file on command line try:\nparallax_cubemap_vmt_tool \"path_to_file\\file_name.vmt\"");
+        // exit() should be ok here since we've not done anything yet
         exit(0);
     }
 
@@ -151,9 +166,12 @@ int main(int argc, char *argv[])
         {
             PrintLine("Successfully Opened: " + strInputPath);
 
+            // The first line of the file is put into a separate var
             std::string strFirstLine;
             std::getline(ifVmtFile, strFirstLine);
+            ValidateShaderName(strFirstLine);
 
+            // Then we place the rest of the file in another var
             std::stringstream isRestOfFile;
             ReadLinesFromFile(ifVmtFile, isRestOfFile);
 
