@@ -39,6 +39,8 @@ void PrintLine(const std::string &strToPrint, EMessagePrefix eMsgPrefix = EMessa
     }
 }
 
+// Returns full path with filename and extension
+// e.g. C:/Users/blah/folder/output_file_pcc.vmt
 std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string &strExportPath)
 {
     if (eShaderType == EDetectedShader::LightmappedGeneric)
@@ -53,8 +55,7 @@ std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string 
     }
     // FIXME: I get a warning about some paths not returning, so I am going to place an assert here at this time
     assert(0 && "An invalid shader was passed into the Suffix function!");
-    // I was going to return a nullptr but as this is used inside an ofstream i will play it safe
-    // and just pass a string back with 'error' in it to indicate something has gone wrong :V
+    // Tested assert(), looks like the program is terminated? But just in case, i will leave this line here
     return strExportPath + "_error.vmt";
 }
 
@@ -76,8 +77,8 @@ bool CreateVmtFile(const std::string &strExportPath, const std::stringstream &is
     else
     {
         // An unknown shader was passed in so close it firstly then return false to signify error
-        PrintLine("Tried to create VMT file with invalid Shader!", EMessagePrefix::Err);
         ofNewVmtFile.close();
+        assert(0 && "An invalid shader was passed into the CreateVmtFile function!");
         // TODO: Delete this file instead of leaving an invalid/empty one?
         return false;
     }
@@ -189,6 +190,8 @@ int main(int argc, char *argv[])
 
             EDetectedShader eFoundShader = DetectFileShader(strFirstLine);
 
+            // TODO: Seems like there's a bit of if nesting going on
+            // Do all these called functions really need to check as much as they currently are? See CreateVmtFile
             if (eFoundShader != EDetectedShader::None)
             {
                 // CreateVmtFile returns a bool to try and ensure the amount of successful file writes shown is correct
