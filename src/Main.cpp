@@ -182,6 +182,12 @@ int main(int argc, char *argv[])
             continue;
         }
 
+        if (pathFilesystemInputPath.extension().string() != ".vmt")
+        {
+            PrintLine("The input file is not of file type .VMT!", EMessagePrefix::Err);
+            continue;
+        }
+
         std::ifstream ifVmtFile(strInputPath);
         if (ifVmtFile.is_open())
         {
@@ -215,5 +221,5 @@ int main(int argc, char *argv[])
             PrintLine("Couldn't Open File: " + strInputPath, EMessagePrefix::Err);
         }
     }
-    PrintLine(std::to_string(iSuccessfulFileWrites) + "/" + std::to_string(argc - 1) + " Files Written");
+    PrintLine(std::to_string(iSuccessfulFileWrites) + "/" + std::to_string(argc - 1) + " Files Written.");
 }
