@@ -125,7 +125,7 @@ std::string MakeExportPathString(std::filesystem::path inputPath)
 }
 
 // TODO: Any algorithms etc for better checking than this? Is the current solution okay?
-EDetectedShader DetectFileShader(std::string &strFirstLine)
+EDetectedShader DetectFileShader(const std::string &strFirstLine)
 {
     if (strFirstLine == "sdk_lightmappedgeneric")
     {
