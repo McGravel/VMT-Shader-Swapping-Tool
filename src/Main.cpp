@@ -37,7 +37,6 @@ enum class EDetectedShader
     SDK_LightmappedGeneric
 };
 
-// TODO: Better way of doing this? Classes? Using one of the Map things to assign a string to enums?
 void PrintLine(const std::string &strToPrint, EMessagePrefix eMsgPrefix = EMessagePrefix::None)
 {
     if (eMsgPrefix == EMessagePrefix::None)
@@ -112,7 +111,6 @@ bool CreateVmtFile(const std::string &strExportPath, const std::stringstream &is
 }
 
 // I suppose this is one way of making the path
-// TODO: Look at <filesystem> for potentially better ways of doing this
 std::string MakeExportPathString(std::filesystem::path inputPath)
 {
     // Get filename explicitly, no path or extension via stem()
@@ -124,7 +122,6 @@ std::string MakeExportPathString(std::filesystem::path inputPath)
     return strPathNoFileName + strFileNameNoExtension;
 }
 
-// TODO: Any algorithms etc for better checking than this? Is the current solution okay?
 EDetectedShader DetectFileShader(const std::string &strFirstLine)
 {
     if (strFirstLine == "sdk_lightmappedgeneric")
@@ -156,7 +153,6 @@ void ReadLinesFromFile(std::ifstream &ifVmtFile, std::stringstream &isRestOfFile
 void ValidateShaderName(std::string &strFirstLine)
 {
     // Code snippets that hopefully remove the quotes and whitespace, this is ridiculous for such a simple thing tbh
-    // TODO: Look into algorithms/etc that may be better?
     strFirstLine.erase(std::remove(strFirstLine.begin(), strFirstLine.end(), '\"'), strFirstLine.end());
     strFirstLine.erase(std::remove_if(strFirstLine.begin(), strFirstLine.end(), isspace), strFirstLine.end());
 
@@ -179,7 +175,6 @@ int main(int argc, char *argv[])
     }
 
     // For loop to iterate each input file, it's a big one
-    // TODO: Break this up further?
     int iSuccessfulFileWrites = 0;
     for (int i = 1; i < argc; i++)
     {
@@ -232,7 +227,6 @@ int main(int argc, char *argv[])
         }
         else
         {
-            // TODO: Can we get a more descriptive error than this generic one?
             PrintLine("Couldn't Open File: " + strInputPath, EMessagePrefix::Err);
         }
     }
