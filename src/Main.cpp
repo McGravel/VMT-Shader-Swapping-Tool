@@ -132,7 +132,6 @@ EDetectedShader DetectFileShader(const std::string &strFirstLine)
         return EDetectedShader::LightmappedGeneric;
     }
 
-    // TODO: Make user specify?
     PrintLine("Expected SDK_LightmappedGeneric or LightmappedGeneric as first line in file.", EMessagePrefix::Err);
     return EDetectedShader::None;
 }
