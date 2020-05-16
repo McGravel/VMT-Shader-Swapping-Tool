@@ -76,10 +76,7 @@ std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string 
 // Creates a new VMT file with the first line changed; returns boolean to try and signify this worked as expected
 bool CreateVmtFile(const std::string &strExportPath, const std::stringstream &isRestOfVmt, const EDetectedShader &eShaderType)
 {
-    // TODO: Remove existing suffix from input file? Maybe just tell people about the suffix in the Usage dialog?
-
     // This is the one place I can put this without messages being duplicated for now
-    // TODO: We need to ask the user in this case if this is what they want
     std::string strOutputPath = SetFileSuffix(eShaderType, strExportPath);
     if (std::filesystem::exists(strOutputPath))
     {
