@@ -1,4 +1,4 @@
-# Parallax Cubemap VMT Tool
+# VMT Shader Swapping Tool
 #### An attempt at figuring out some C++ by creating a small, practical tool.
 #### Intended as a small command-line tool for quickly generating VMT files with the first line changed to swap the Shader used to allow easier usage of Parallax-Corrected Cubemaps.
 ---
