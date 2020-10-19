@@ -146,7 +146,7 @@ std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string 
         }
         else
         {
-            PrintLine("Exporting PCC (SDK_LightmappedGeneric): " + strExportPath + ".vmt");
+            PrintLine("Overwriting as PCC (SDK_LightmappedGeneric): " + strExportPath + ".vmt");
             return strExportPath + ".vmt";
         }
     }
@@ -159,7 +159,7 @@ std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string 
         }
         else
         {
-            PrintLine("Exporting LightmappedGeneric: " + strExportPath + ".vmt");
+            PrintLine("Overwriting as LightmappedGeneric: " + strExportPath + ".vmt");
             return strExportPath + ".vmt";
         }
     }
