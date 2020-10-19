@@ -47,9 +47,6 @@ enum class EPccOrVlgResponse
     VlgDontAskAgain
 };
 
-// Global output mode for use when user doesn't want to be asked each time
-EPccOrVlgResponse g_eOutputMode = EPccOrVlgResponse::None;
-
 void PrintLine(const std::string &strToPrint, EMessagePrefix eMsgPrefix = EMessagePrefix::None)
 {
     if (eMsgPrefix == EMessagePrefix::None)
@@ -67,27 +64,27 @@ void PrintLine(const std::string &strToPrint, EMessagePrefix eMsgPrefix = EMessa
 }
 
 // Ask user if they want to output a PCC or VertexLit (Propper) version when LightmappedGeneric is detected
-EPccOrVlgResponse AskIfPccOrVlg()
+// TODO: Janky - Affects inputType directly as well as returning an Enum value...
+EPccOrVlgResponse AskIfPccOrVlg(EPccOrVlgResponse &inputType)
 { 
-    if (g_eOutputMode == EPccOrVlgResponse::PccDontAskAgain || g_eOutputMode == EPccOrVlgResponse::VlgDontAskAgain)
+    if (inputType == EPccOrVlgResponse::PccDontAskAgain || inputType == EPccOrVlgResponse::VlgDontAskAgain)
     {
-        if (g_eOutputMode == EPccOrVlgResponse::PccDontAskAgain)
+        if (inputType == EPccOrVlgResponse::PccDontAskAgain)
         {
             return EPccOrVlgResponse::Pcc;
         }
-        if (g_eOutputMode == EPccOrVlgResponse::VlgDontAskAgain)
+        if (inputType == EPccOrVlgResponse::VlgDontAskAgain)
         {
             return EPccOrVlgResponse::Vlg;
         }
     }
+    else if (inputType == EPccOrVlgResponse::Pcc || inputType == EPccOrVlgResponse::Vlg)
+    {
+        return inputType;
+    }
     else
     {
-        EPccOrVlgResponse eOption = EPccOrVlgResponse::None;
-        // TODO: User Input stuff
-        if (eOption == EPccOrVlgResponse::Pcc || eOption == EPccOrVlgResponse::Vlg)
-        {
-            return eOption;
-        }
+        // TODO: User input stuff
     }
     return EPccOrVlgResponse::None;
 }
@@ -183,7 +180,10 @@ bool CreateVmtFile(const std::string &strExportPath, const std::stringstream &is
 
     if (eShaderType == EDetectedShader::LightmappedGeneric)
     {
-        EPccOrVlgResponse eResponse = AskIfPccOrVlg();
+        // Static mode of operation that persists between calls, affected by AskIfPccOrVlg() at the moment as it changes it directly...
+        static EPccOrVlgResponse eMode = EPccOrVlgResponse::None;
+        EPccOrVlgResponse eResponse = AskIfPccOrVlg(eMode);
+
         if (eResponse == EPccOrVlgResponse::Pcc || eResponse == EPccOrVlgResponse::PccDontAskAgain)
         {
             ofNewVmtFile << "\"SDK_LightmappedGeneric\"\n";
