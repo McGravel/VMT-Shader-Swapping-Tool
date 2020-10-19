@@ -34,8 +34,21 @@ enum class EDetectedShader
 {
     None,
     LightmappedGeneric,
-    SDK_LightmappedGeneric
+    SDK_LightmappedGeneric,
+    VertexLitGeneric
 };
+
+enum class EPccOrVlgResponse
+{
+    None,
+    Pcc,
+    Vlg,
+    PccDontAskAgain,
+    VlgDontAskAgain
+};
+
+// Global output mode for use when user doesn't want to be asked each time
+EPccOrVlgResponse g_eOutputMode = EPccOrVlgResponse::None;
 
 void PrintLine(const std::string &strToPrint, EMessagePrefix eMsgPrefix = EMessagePrefix::None)
 {
@@ -53,6 +66,32 @@ void PrintLine(const std::string &strToPrint, EMessagePrefix eMsgPrefix = EMessa
     }
 }
 
+// Ask user if they want to output a PCC or VertexLit (Propper) version when LightmappedGeneric is detected
+EPccOrVlgResponse AskIfPccOrVlg()
+{ 
+    if (g_eOutputMode == EPccOrVlgResponse::PccDontAskAgain || g_eOutputMode == EPccOrVlgResponse::VlgDontAskAgain)
+    {
+        if (g_eOutputMode == EPccOrVlgResponse::PccDontAskAgain)
+        {
+            return EPccOrVlgResponse::Pcc;
+        }
+        if (g_eOutputMode == EPccOrVlgResponse::VlgDontAskAgain)
+        {
+            return EPccOrVlgResponse::Vlg;
+        }
+    }
+    else
+    {
+        EPccOrVlgResponse eOption = EPccOrVlgResponse::None;
+        // TODO: User Input stuff
+        if (eOption == EPccOrVlgResponse::Pcc || eOption == EPccOrVlgResponse::Vlg)
+        {
+            return eOption;
+        }
+    }
+    return EPccOrVlgResponse::None;
+}
+
 // Returns full path with filename and extension
 // e.g. C:/Users/blah/folder/output_file_pcc.vmt
 std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string &strExportPath)
@@ -62,10 +101,10 @@ std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string 
         PrintLine("Exporting PCC (SDK_LightmappedGeneric): " + strExportPath + "_pcc.vmt");
         return strExportPath + "_pcc.vmt";
     }
-    if (eShaderType == EDetectedShader::SDK_LightmappedGeneric)
+    if (eShaderType == EDetectedShader::SDK_LightmappedGeneric || eShaderType == EDetectedShader::VertexLitGeneric)
     {
-        PrintLine("Exporting Regular LightmappedGeneric: " + strExportPath + "_no_pcc.vmt");
-        return strExportPath + "_no_pcc.vmt";
+        PrintLine("Exporting LightmappedGeneric: " + strExportPath + "_lmg.vmt");
+        return strExportPath + "_lmg.vmt";
     }
 
     assert(0 && "An invalid shader was passed into the Suffix function!");
@@ -86,9 +125,22 @@ bool CreateVmtFile(const std::string &strExportPath, const std::stringstream &is
 
     if (eShaderType == EDetectedShader::LightmappedGeneric)
     {
-        ofNewVmtFile << "\"SDK_LightmappedGeneric\"\n";
+        EPccOrVlgResponse eResponse = AskIfPccOrVlg();
+        if (eResponse == EPccOrVlgResponse::Pcc || eResponse == EPccOrVlgResponse::PccDontAskAgain)
+        {
+            ofNewVmtFile << "\"SDK_LightmappedGeneric\"\n";
+        }
+        else if (eResponse == EPccOrVlgResponse::Vlg || eResponse == EPccOrVlgResponse::VlgDontAskAgain)
+        {
+            ofNewVmtFile << "\"VertexLitGeneric\"\n";
+        }
+        else
+        {
+            // I don't think the assert outside this block will catch this
+            assert(0 && "Invalid Option Returned from User Input");
+        }
     }
-    else if (eShaderType == EDetectedShader::SDK_LightmappedGeneric)
+    else if (eShaderType == EDetectedShader::SDK_LightmappedGeneric || eShaderType == EDetectedShader::VertexLitGeneric)
     {
         ofNewVmtFile << "\"LightmappedGeneric\"\n";
     }
@@ -129,8 +181,13 @@ EDetectedShader DetectFileShader(const std::string &strFirstLine)
         PrintLine("Found LightmappedGeneric");
         return EDetectedShader::LightmappedGeneric;
     }
+    if (strFirstLine == "vertexlitgeneric")
+    {
+        PrintLine("Found VertexLitGeneric");
+        return EDetectedShader::VertexLitGeneric;
+    }
 
-    PrintLine("Expected SDK_LightmappedGeneric or LightmappedGeneric as first line in file.", EMessagePrefix::Err);
+    PrintLine("Expected SDK_LightmappedGeneric, LightmappedGeneric, or VertexLitGeneric as the first line in file.", EMessagePrefix::Err);
     return EDetectedShader::None;
 }
 
@@ -172,7 +229,7 @@ int main(int argc, char *argv[])
     int iSuccessfulFileWrites = 0;
     for (int i = 1; i < argc; i++)
     {
-        PrintLine("Argument " + std::to_string(i) + ": " + argv[i]);
+        PrintLine("\nArgument " + std::to_string(i) + ": " + argv[i]);
 
         // Messing about with filesystem to figure out paths
         std::filesystem::path pathFilesystemInputPath{ argv[i] };
