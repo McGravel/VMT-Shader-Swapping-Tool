@@ -67,9 +67,8 @@ std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string 
         PrintLine("Exporting Regular LightmappedGeneric: " + strExportPath + "_no_pcc.vmt");
         return strExportPath + "_no_pcc.vmt";
     }
-    // FIXME: I get a warning about some paths not returning, so I am going to place an assert here at this time
+
     assert(0 && "An invalid shader was passed into the Suffix function!");
-    // Tested assert(), looks like the program is terminated? But just in case, i will leave this line here
     return strExportPath + "_error.vmt";
 }
 
@@ -107,13 +106,12 @@ bool CreateVmtFile(const std::string &strExportPath, const std::stringstream &is
     return true;
 }
 
-// I suppose this is one way of making the path
 std::string MakeExportPathString(std::filesystem::path inputPath)
 {
     // Get filename explicitly, no path or extension via stem()
     std::string strFileNameNoExtension(inputPath.stem().string());
 
-    // Get path through removing filename from it - i'm just trying these things out and keeping them if they seem useful
+    // Get path through removing filename from it
     std::string strPathNoFileName(inputPath.remove_filename().string());
 
     return strPathNoFileName + strFileNameNoExtension;
