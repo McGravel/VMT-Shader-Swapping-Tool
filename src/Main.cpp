@@ -27,7 +27,8 @@ enum class EMessagePrefix
 {
     None,
     Warn,
-    Err
+    Err,
+    Success
 };
 
 enum class EDetectedShader
@@ -60,6 +61,10 @@ void PrintLine(const std::string &strToPrint, EMessagePrefix eMsgPrefix = EMessa
     if (eMsgPrefix == EMessagePrefix::Err)
     {
         std::cout << "[ERROR] " + strToPrint + "\n";
+    }
+    if (eMsgPrefix == EMessagePrefix::Success)
+    {
+        std::cout << "[SUCCESS] " + strToPrint + "\n";
     }
 }
 
@@ -278,7 +283,7 @@ int main(int argc, char *argv[])
         std::ifstream ifVmtFile(strInputPath);
         if (ifVmtFile.is_open())
         {
-            PrintLine("Successfully Opened: " + strInputPath);
+            PrintLine("Successfully Opened: " + strInputPath, EMessagePrefix::Success);
 
             // The first line of the file is put into a separate var
             std::string strFirstLine;
