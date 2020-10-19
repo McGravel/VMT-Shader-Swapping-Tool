@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
     if (argc < 2)
     {
         PrintLine("Sorry, you need to pass a path via the command line or drag-and-drop!\n", EMessagePrefix::Err);
-        PrintLine("Usage:\nTo specify a file on command line try:\nparallax_cubemap_vmt_tool \"path_to_file\\file_name.vmt\"");
+        PrintLine("Usage:\nTo specify a file on command line try:\nvmt_shader_swap_tool \"path_to_file\\file_name.vmt\"");
         // exit() should be ok here since we've not done anything yet
         exit(0);
     }
