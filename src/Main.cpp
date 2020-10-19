@@ -21,7 +21,7 @@
 #include <sstream>
 #include <string>
 
-constexpr auto APPLICATION_TITLE = "Parallax Cubemap VMT Tool v0.6";
+constexpr auto APPLICATION_TITLE = "VMT Shader Swapping Tool v0.6";
 
 enum class EMessagePrefix
 {
