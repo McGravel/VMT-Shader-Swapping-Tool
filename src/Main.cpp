@@ -130,17 +130,33 @@ std::string MakeExportPathString(std::filesystem::path inputPath)
 
 // Returns full path with filename and extension
 // e.g. C:/Users/blah/folder/output_file_pcc.vmt
-std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string &strExportPath)
+std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string &strExportPath, const bool &bSuffix = true)
 {
     if (eShaderType == EDetectedShader::LightmappedGeneric)
     {
-        PrintLine("Exporting PCC (SDK_LightmappedGeneric): " + strExportPath + "_pcc.vmt");
-        return strExportPath + "_pcc.vmt";
+        if (bSuffix)
+        {
+            PrintLine("Exporting PCC (SDK_LightmappedGeneric): " + strExportPath + "_pcc.vmt");
+            return strExportPath + "_pcc.vmt";
+        }
+        else
+        {
+            PrintLine("Exporting PCC (SDK_LightmappedGeneric): " + strExportPath + ".vmt");
+            return strExportPath + ".vmt";
+        }
     }
     if (eShaderType == EDetectedShader::SDK_LightmappedGeneric || eShaderType == EDetectedShader::VertexLitGeneric)
     {
-        PrintLine("Exporting LightmappedGeneric: " + strExportPath + "_lmg.vmt");
-        return strExportPath + "_lmg.vmt";
+        if (bSuffix)
+        {
+            PrintLine("Exporting LightmappedGeneric: " + strExportPath + "_lmg.vmt");
+            return strExportPath + "_lmg.vmt";
+        }
+        else
+        {
+            PrintLine("Exporting LightmappedGeneric: " + strExportPath + ".vmt");
+            return strExportPath + ".vmt";
+        }
     }
 
     assert(0 && "An invalid shader was passed into the Suffix function!");
@@ -173,8 +189,10 @@ void ValidateShaderName(std::string &strFirstLine)
 // Creates a new VMT file with the first line changed; returns boolean to try and signify this worked as expected
 bool CreateVmtFile(const std::string &strExportPath, const std::stringstream &isRestOfVmt, const EDetectedShader &eShaderType)
 {
-    // This is the one place I can put this without messages being duplicated for now
-    std::string strOutputPath = SetFileSuffix(eShaderType, strExportPath);
+    // TODO: Another spot to ask user for yes/no to set this boolean properly
+    bool bHasSuffix = true;
+    std::string strOutputPath = SetFileSuffix(eShaderType, strExportPath, bHasSuffix);
+
     if (std::filesystem::exists(strOutputPath))
     {
         PrintLine("Overwriting an existing file!", EMessagePrefix::Warn);
