@@ -74,8 +74,8 @@ EPccOrVlgResponse CheckLmgMode(const EPccOrVlgResponse &inputMode)
     return EPccOrVlgResponse::None;
 }
 
-// Ask user if they want to output a PCC or VertexLit (Propper) version when LightmappedGeneric is detected
-EPccOrVlgResponse AskIfPccOrVlg(const EPccOrVlgResponse &inputType)
+// Return base version of EPccOrVlgResponse from DontAskAgain version if it is set to either one
+EPccOrVlgResponse GetPccOrVlg(const EPccOrVlgResponse &inputType)
 { 
     if (inputType == EPccOrVlgResponse::PccDontAskAgain || inputType == EPccOrVlgResponse::VlgDontAskAgain)
     {
@@ -185,8 +185,10 @@ bool CreateVmtFile(const std::string &strExportPath, const std::stringstream &is
     if (eShaderType == EDetectedShader::LightmappedGeneric)
     {
         // Static mode of operation that persists between calls
+        // eMode is used to see if PCC or VLG is in "don't ask again" mode
         static EPccOrVlgResponse eMode = CheckLmgMode(eMode);
-        EPccOrVlgResponse eResponse = AskIfPccOrVlg(eMode);
+        // Then get the regular version if it's not already not a "don't ask again" variant
+        EPccOrVlgResponse eResponse = GetPccOrVlg(eMode);
 
         if (eResponse == EPccOrVlgResponse::Pcc)
         {
