@@ -92,6 +92,40 @@ EPccOrVlgResponse AskIfPccOrVlg()
     return EPccOrVlgResponse::None;
 }
 
+EDetectedShader DetectFileShader(const std::string &strFirstLine)
+{
+    if (strFirstLine == "sdk_lightmappedgeneric")
+    {
+        PrintLine("Found SDK_LightmappedGeneric");
+        return EDetectedShader::SDK_LightmappedGeneric;
+    }
+    if (strFirstLine == "lightmappedgeneric")
+    {
+        PrintLine("Found LightmappedGeneric");
+        return EDetectedShader::LightmappedGeneric;
+    }
+    if (strFirstLine == "vertexlitgeneric")
+    {
+        PrintLine("Found VertexLitGeneric");
+        return EDetectedShader::VertexLitGeneric;
+    }
+
+    PrintLine("Expected SDK_LightmappedGeneric, LightmappedGeneric, or VertexLitGeneric as the first line in file.",
+              EMessagePrefix::Err);
+    return EDetectedShader::None;
+}
+
+std::string MakeExportPathString(std::filesystem::path inputPath)
+{
+    // Get filename explicitly, no path or extension via stem()
+    std::string strFileNameNoExtension(inputPath.stem().string());
+
+    // Get path through removing filename from it
+    std::string strPathNoFileName(inputPath.remove_filename().string());
+
+    return strPathNoFileName + strFileNameNoExtension;
+}
+
 // Returns full path with filename and extension
 // e.g. C:/Users/blah/folder/output_file_pcc.vmt
 std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string &strExportPath)
@@ -109,6 +143,30 @@ std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string 
 
     assert(0 && "An invalid shader was passed into the Suffix function!");
     return strExportPath + "_error.vmt";
+}
+
+
+void ReadLinesFromFile(std::ifstream &ifVmtFile, std::stringstream &isRestOfFile)
+{
+    for (std::string str; std::getline(ifVmtFile, str);)
+    {
+        isRestOfFile << str << "\n";
+    }
+    ifVmtFile.close();
+}
+
+// This function will transform the string to allow for easier use by DetectFileShader() and potentially elsewhere
+void ValidateShaderName(std::string &strFirstLine)
+{
+    // Code snippets that hopefully remove the quotes and whitespace, this is ridiculous for such a simple thing tbh
+    strFirstLine.erase(std::remove(strFirstLine.begin(), strFirstLine.end(), '\"'), strFirstLine.end());
+    strFirstLine.erase(std::remove_if(strFirstLine.begin(), strFirstLine.end(), isspace), strFirstLine.end());
+
+#pragma warning(push)
+#pragma warning(disable : 4244)
+    // Snippet found online, the ::tolower part is quite interesting
+    std::transform(strFirstLine.begin(), strFirstLine.end(), strFirstLine.begin(), ::tolower);
+#pragma warning(pop)
 }
 
 // Creates a new VMT file with the first line changed; returns boolean to try and signify this worked as expected
@@ -156,62 +214,6 @@ bool CreateVmtFile(const std::string &strExportPath, const std::stringstream &is
     ofNewVmtFile << isRestOfVmt.rdbuf();
     ofNewVmtFile.close();
     return true;
-}
-
-std::string MakeExportPathString(std::filesystem::path inputPath)
-{
-    // Get filename explicitly, no path or extension via stem()
-    std::string strFileNameNoExtension(inputPath.stem().string());
-
-    // Get path through removing filename from it
-    std::string strPathNoFileName(inputPath.remove_filename().string());
-
-    return strPathNoFileName + strFileNameNoExtension;
-}
-
-EDetectedShader DetectFileShader(const std::string &strFirstLine)
-{
-    if (strFirstLine == "sdk_lightmappedgeneric")
-    {
-        PrintLine("Found SDK_LightmappedGeneric");
-        return EDetectedShader::SDK_LightmappedGeneric;
-    }
-    if (strFirstLine == "lightmappedgeneric")
-    {
-        PrintLine("Found LightmappedGeneric");
-        return EDetectedShader::LightmappedGeneric;
-    }
-    if (strFirstLine == "vertexlitgeneric")
-    {
-        PrintLine("Found VertexLitGeneric");
-        return EDetectedShader::VertexLitGeneric;
-    }
-
-    PrintLine("Expected SDK_LightmappedGeneric, LightmappedGeneric, or VertexLitGeneric as the first line in file.", EMessagePrefix::Err);
-    return EDetectedShader::None;
-}
-
-void ReadLinesFromFile(std::ifstream &ifVmtFile, std::stringstream &isRestOfFile)
-{
-    for (std::string str; std::getline(ifVmtFile, str);)
-    {
-        isRestOfFile << str << "\n";
-    }
-    ifVmtFile.close();
-}
-
-// This function will transform the string to allow for easier use by DetectFileShader() and potentially elsewhere
-void ValidateShaderName(std::string &strFirstLine)
-{
-    // Code snippets that hopefully remove the quotes and whitespace, this is ridiculous for such a simple thing tbh
-    strFirstLine.erase(std::remove(strFirstLine.begin(), strFirstLine.end(), '\"'), strFirstLine.end());
-    strFirstLine.erase(std::remove_if(strFirstLine.begin(), strFirstLine.end(), isspace), strFirstLine.end());
-
-#pragma warning(push)
-#pragma warning(disable : 4244)
-    // Snippet found online, the ::tolower part is quite interesting
-    std::transform(strFirstLine.begin(), strFirstLine.end(), strFirstLine.begin(), ::tolower);
-#pragma warning(pop)
 }
 
 int main(int argc, char *argv[])
