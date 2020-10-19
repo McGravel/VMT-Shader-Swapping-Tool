@@ -63,9 +63,19 @@ void PrintLine(const std::string &strToPrint, EMessagePrefix eMsgPrefix = EMessa
     }
 }
 
+EPccOrVlgResponse CheckLmgMode(const EPccOrVlgResponse &inputMode)
+{
+    if (inputMode != EPccOrVlgResponse::None)
+    {
+        return inputMode;
+    }
+
+    // TODO: Ask User for Mode Selection, return none for now...
+    return EPccOrVlgResponse::None;
+}
+
 // Ask user if they want to output a PCC or VertexLit (Propper) version when LightmappedGeneric is detected
-// TODO: Janky - Affects inputType directly as well as returning an Enum value...
-EPccOrVlgResponse AskIfPccOrVlg(EPccOrVlgResponse &inputType)
+EPccOrVlgResponse AskIfPccOrVlg(const EPccOrVlgResponse &inputType)
 { 
     if (inputType == EPccOrVlgResponse::PccDontAskAgain || inputType == EPccOrVlgResponse::VlgDontAskAgain)
     {
@@ -78,15 +88,10 @@ EPccOrVlgResponse AskIfPccOrVlg(EPccOrVlgResponse &inputType)
             return EPccOrVlgResponse::Vlg;
         }
     }
-    else if (inputType == EPccOrVlgResponse::Pcc || inputType == EPccOrVlgResponse::Vlg)
+    else
     {
         return inputType;
     }
-    else
-    {
-        // TODO: User input stuff
-    }
-    return EPccOrVlgResponse::None;
 }
 
 EDetectedShader DetectFileShader(const std::string &strFirstLine)
@@ -142,7 +147,6 @@ std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string 
     return strExportPath + "_error.vmt";
 }
 
-
 void ReadLinesFromFile(std::ifstream &ifVmtFile, std::stringstream &isRestOfFile)
 {
     for (std::string str; std::getline(ifVmtFile, str);)
@@ -180,15 +184,15 @@ bool CreateVmtFile(const std::string &strExportPath, const std::stringstream &is
 
     if (eShaderType == EDetectedShader::LightmappedGeneric)
     {
-        // Static mode of operation that persists between calls, affected by AskIfPccOrVlg() at the moment as it changes it directly...
-        static EPccOrVlgResponse eMode = EPccOrVlgResponse::None;
+        // Static mode of operation that persists between calls
+        static EPccOrVlgResponse eMode = CheckLmgMode(eMode);
         EPccOrVlgResponse eResponse = AskIfPccOrVlg(eMode);
 
-        if (eResponse == EPccOrVlgResponse::Pcc || eResponse == EPccOrVlgResponse::PccDontAskAgain)
+        if (eResponse == EPccOrVlgResponse::Pcc)
         {
             ofNewVmtFile << "\"SDK_LightmappedGeneric\"\n";
         }
-        else if (eResponse == EPccOrVlgResponse::Vlg || eResponse == EPccOrVlgResponse::VlgDontAskAgain)
+        else if (eResponse == EPccOrVlgResponse::Vlg)
         {
             ofNewVmtFile << "\"VertexLitGeneric\"\n";
         }
