@@ -20,6 +20,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <fmt/core.h>
+#include <fmt/color.h>
 
 constexpr auto APPLICATION_TITLE = "VMT Shader Swapping Tool v0.7";
 
@@ -28,7 +30,8 @@ enum class EMessagePrefix
     None,
     Warn,
     Err,
-    Success
+    Success,
+    Info
 };
 
 enum class EDetectedShader
@@ -52,19 +55,24 @@ void PrintLine(const std::string &strToPrint, EMessagePrefix eMsgPrefix = EMessa
 {
     if (eMsgPrefix == EMessagePrefix::None)
     {
-        std::cout << strToPrint + "\n";
+        //std::cout << strToPrint + "\n";
+        fmt::print("{}\n", strToPrint);
     }
     if (eMsgPrefix == EMessagePrefix::Warn)
     {
-        std::cout << "[WARNING] " + strToPrint + "\n";
+        fmt::print(fmt::fg(fmt::color::yellow) | fmt::emphasis::bold, "[WARNING]: {}\n", strToPrint);
     }
     if (eMsgPrefix == EMessagePrefix::Err)
     {
-        std::cout << "[ERROR] " + strToPrint + "\n";
+        fmt::print(fmt::fg(fmt::color::orange_red) | fmt::emphasis::bold, "[ERROR]: {}\n", strToPrint);
     }
     if (eMsgPrefix == EMessagePrefix::Success)
     {
-        std::cout << "[SUCCESS] " + strToPrint + "\n";
+        fmt::print(fmt::fg(fmt::color::sea_green) | fmt::emphasis::bold, "[SUCCESS]: {}\n", strToPrint);
+    }
+    if (eMsgPrefix == EMessagePrefix::Info)
+    {
+        fmt::print(fmt::fg(fmt::color::dodger_blue) | fmt::emphasis::bold, "[INFO]: {}\n", strToPrint);
     }
 }
 
@@ -72,25 +80,27 @@ EPccOrVlgResponse PromptLmgMode()
 {
     while (true)
     {
-        int iResponse;
-        PrintLine("LightmappedGeneric Detected. Please pick which shader to use:\n");
-        PrintLine("1: PCC\n2: VertexLitGeneric\n3: PCC (Don't ask again)\n4: VertexLitGeneric (Don't ask again)");
+        int iResponse = 0;
+        PrintLine("LightmappedGeneric Detected. Please pick which shader to use:", EMessagePrefix::Info);
+        PrintLine("1: Parallax-Corrected Cubemap (SDK_LightmappedGeneric)\n"
+                  "2: VertexLitGeneric\n"
+                  "3: Parallax-Corrected Cubemap (SDK_LightmappedGeneric) (Don't ask again)\n"
+                  "4: VertexLitGeneric (Don't ask again)");
+
         std::cin >> iResponse;
         if (iResponse > 1 && iResponse < 5)
         {
             switch (iResponse)
             {
             case 1:
-                PrintLine("PCC");
                 return EPccOrVlgResponse::Pcc;
             case 2:
-                PrintLine("VertexLitGeneric");
                 return EPccOrVlgResponse::Vlg;
             case 3:
-                PrintLine("Outputting all subsequent LightmappedGeneric files as PCC.");
+                PrintLine("Outputting all subsequent LightmappedGeneric files as Parallax-Corrected Cubemap (SDK_LightmappedGeneric).", EMessagePrefix::Info);
                 return EPccOrVlgResponse::PccDontAskAgain;
             case 4:
-                PrintLine("Outputting all subsequent LightmappedGeneric files as VertexLitGeneric.");
+                PrintLine("Outputting all subsequent LightmappedGeneric files as VertexLitGeneric.", EMessagePrefix::Info);
                 return EPccOrVlgResponse::VlgDontAskAgain;
             default:
                 assert(0 && "User Input Broke!");
@@ -119,7 +129,7 @@ EPccOrVlgResponse GetPccOrVlg(const EPccOrVlgResponse &inputType)
     {
         if (inputType == EPccOrVlgResponse::PccDontAskAgain)
         {
-            PrintLine("Outputting as PCC, as we're not asking again.");
+            PrintLine("Outputting as Parallax-Corrected Cubemap (SDK_LightmappedGeneric), as we're not asking again.");
             return EPccOrVlgResponse::Pcc;
         }
         if (inputType == EPccOrVlgResponse::VlgDontAskAgain)
@@ -138,19 +148,14 @@ EDetectedShader DetectFileShader(const std::string &strFirstLine)
 {
     if (strFirstLine == "sdk_lightmappedgeneric")
     {
-        PrintLine("Found SDK_LightmappedGeneric");
         return EDetectedShader::SDK_LightmappedGeneric;
     }
-
     if (strFirstLine == "lightmappedgeneric")
     {
-        PrintLine("Found LightmappedGeneric");
         return EDetectedShader::LightmappedGeneric;
     }
-
     if (strFirstLine == "vertexlitgeneric")
     {
-        PrintLine("Found VertexLitGeneric");
         return EDetectedShader::VertexLitGeneric;
     }
 
@@ -178,12 +183,12 @@ std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string 
     {
         if (!bSuffix)
         {
-            PrintLine("Exporting PCC (SDK_LightmappedGeneric): " + strExportPath + "_pcc.vmt");
+            PrintLine("Exporting Parallax-Corrected Cubemap (SDK_LightmappedGeneric): " + strExportPath + "_pcc.vmt", EMessagePrefix::Info);
             return strExportPath + "_pcc.vmt";
         }
         else
         {
-            PrintLine("Overwriting as PCC (SDK_LightmappedGeneric): " + strExportPath + ".vmt");
+            PrintLine("Overwriting as Parallax-Corrected Cubemaps (SDK_LightmappedGeneric): " + strExportPath + ".vmt", EMessagePrefix::Info);
             return strExportPath + ".vmt";
         }
     }
@@ -193,12 +198,12 @@ std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string 
         if (!bSuffix)
 
         {
-            PrintLine("Exporting LightmappedGeneric: " + strExportPath + "_lmg.vmt");
+            PrintLine("Exporting LightmappedGeneric: " + strExportPath + "_lmg.vmt", EMessagePrefix::Info);
             return strExportPath + "_lmg.vmt";
         }
         else
         {
-            PrintLine("Overwriting as LightmappedGeneric: " + strExportPath + ".vmt");
+            PrintLine("Overwriting as LightmappedGeneric: " + strExportPath + ".vmt", EMessagePrefix::Info);
             return strExportPath + ".vmt";
         }
     }
@@ -236,7 +241,7 @@ bool PromptYesNo()
     while (true)
     {
         std::string strResponse;
-        PrintLine("Y/N? ");
+        PrintLine("Y/N?");
         std::cin >> strResponse;
 
         if (strResponse == "Y" || strResponse == "y")
@@ -259,11 +264,12 @@ bool CreateVmtFile(const std::string &strExportPath, const std::stringstream &is
 
     if (std::filesystem::exists(strOutputPath) && !bHasSuffix)
     {
-        PrintLine("Overwriting an existing file!\nConfirm Overwrite?", EMessagePrefix::Warn);
+        PrintLine("Overwriting an existing file!", EMessagePrefix::Warn);
+        PrintLine("Confirm overwriting the file?");
         bool bConfirmOverwrite = PromptYesNo();
         if (!bConfirmOverwrite)
         {
-            PrintLine("Overwrite Cancelled.");
+            PrintLine("Overwrite Cancelled.", EMessagePrefix::Info);
             return false;
         }
     }
