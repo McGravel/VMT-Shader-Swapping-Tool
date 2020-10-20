@@ -88,7 +88,7 @@ EPccOrVlgResponse PromptLmgMode()
                   "4: VertexLitGeneric (Don't ask again)");
 
         std::cin >> iResponse;
-        if (iResponse > 1 && iResponse < 5)
+        if (iResponse > 0 && iResponse < 5)
         {
             switch (iResponse)
             {
