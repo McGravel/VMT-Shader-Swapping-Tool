@@ -252,6 +252,8 @@ bool PromptYesNo()
         {
             return false;
         }
+        std::cin.clear();
+        std::cin.ignore(10000, '\n');
     }
 }
 
