@@ -139,11 +139,13 @@ EDetectedShader DetectFileShader(const std::string &strFirstLine)
         PrintLine("Found SDK_LightmappedGeneric");
         return EDetectedShader::SDK_LightmappedGeneric;
     }
+
     if (strFirstLine == "lightmappedgeneric")
     {
         PrintLine("Found LightmappedGeneric");
         return EDetectedShader::LightmappedGeneric;
     }
+
     if (strFirstLine == "vertexlitgeneric")
     {
         PrintLine("Found VertexLitGeneric");
@@ -169,7 +171,6 @@ std::string MakeExportPathString(std::filesystem::path inputPath)
 // Returns full path with filename and extension
 // e.g. C:/Users/blah/folder/output_file_pcc.vmt
 std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string &strExportPath, const bool &bSuffix)
-
 {
     if (eShaderType == EDetectedShader::LightmappedGeneric)
     {
@@ -184,6 +185,7 @@ std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string 
             return strExportPath + ".vmt";
         }
     }
+
     if (eShaderType == EDetectedShader::SDK_LightmappedGeneric || eShaderType == EDetectedShader::VertexLitGeneric)
     {
         if (!bSuffix)
@@ -198,6 +200,7 @@ std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string 
             return strExportPath + ".vmt";
         }
     }
+
     assert(0 && "An invalid shader was passed into the Suffix function!");
     return strExportPath + "_error.vmt";
 }
@@ -208,6 +211,7 @@ void ReadLinesFromFile(std::ifstream &ifVmtFile, std::stringstream &isRestOfFile
     {
         isRestOfFile << str << "\n";
     }
+
     ifVmtFile.close();
 }
 
@@ -370,5 +374,6 @@ int main(int argc, char *argv[])
             PrintLine("Couldn't Open File: " + strInputPath, EMessagePrefix::Err);
         }
     }
+
     PrintLine("\n" + std::to_string(iSuccessfulFileWrites) + "/" + std::to_string(argc - 1) + " Files Written.");
 }
