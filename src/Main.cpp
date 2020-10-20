@@ -97,6 +97,8 @@ EPccOrVlgResponse PromptLmgMode()
                 break;
             }
         }
+        std::cin.clear();
+        std::cin.ignore(10000, '\n');
     }
 }
 
