@@ -68,6 +68,38 @@ void PrintLine(const std::string &strToPrint, EMessagePrefix eMsgPrefix = EMessa
     }
 }
 
+EPccOrVlgResponse PromptLmgMode()
+{
+    while (true)
+    {
+        int iResponse;
+        PrintLine("LightmappedGeneric Detected. Please pick which shader to use:\n");
+        PrintLine("1: PCC\n2: VertexLitGeneric\n3: PCC (Don't ask again)\n4: VertexLitGeneric (Don't ask again)");
+        std::cin >> iResponse;
+        if (iResponse > 1 && iResponse < 5)
+        {
+            switch (iResponse)
+            {
+            case 1:
+                PrintLine("PCC");
+                return EPccOrVlgResponse::Pcc;
+            case 2:
+                PrintLine("VertexLitGeneric");
+                return EPccOrVlgResponse::Vlg;
+            case 3:
+                PrintLine("Outputting all subsequent LightmappedGeneric files as PCC.");
+                return EPccOrVlgResponse::PccDontAskAgain;
+            case 4:
+                PrintLine("Outputting all subsequent LightmappedGeneric files as VertexLitGeneric.");
+                return EPccOrVlgResponse::VlgDontAskAgain;
+            default:
+                assert(0 && "User Input Broke!");
+                break;
+            }
+        }
+    }
+}
+
 EPccOrVlgResponse CheckLmgMode(const EPccOrVlgResponse &inputMode)
 {
     if (inputMode != EPccOrVlgResponse::None)
@@ -75,8 +107,7 @@ EPccOrVlgResponse CheckLmgMode(const EPccOrVlgResponse &inputMode)
         return inputMode;
     }
 
-    // TODO: Ask User for Mode Selection, return none for now...
-    return EPccOrVlgResponse::None;
+    return PromptLmgMode();
 }
 
 // Return base version of EPccOrVlgResponse from DontAskAgain version if it is set to either one
@@ -86,10 +117,12 @@ EPccOrVlgResponse GetPccOrVlg(const EPccOrVlgResponse &inputType)
     {
         if (inputType == EPccOrVlgResponse::PccDontAskAgain)
         {
+            PrintLine("Outputting as PCC, as we're not asking again.");
             return EPccOrVlgResponse::Pcc;
         }
         if (inputType == EPccOrVlgResponse::VlgDontAskAgain)
         {
+            PrintLine("Outputting as VertexLitGeneric, as we're not asking again.");
             return EPccOrVlgResponse::Vlg;
         }
     }
@@ -191,6 +224,25 @@ void ValidateShaderName(std::string &strFirstLine)
 #pragma warning(pop)
 }
 
+bool PromptYesNo()
+{ 
+    while (true)
+    {
+        std::string strResponse;
+        PrintLine("Y/N? ");
+        std::cin >> strResponse;
+
+        if (strResponse == "Y" || strResponse == "y")
+        {
+            return true;
+        }
+        if (strResponse == "N" || strResponse == "n")
+        {
+            return false;
+        }
+    }
+}
+
 // Creates a new VMT file with the first line changed; returns boolean to try and signify this worked as expected
 bool CreateVmtFile(const std::string &strExportPath, const std::stringstream &isRestOfVmt, const EDetectedShader &eShaderType)
 {
@@ -200,7 +252,14 @@ bool CreateVmtFile(const std::string &strExportPath, const std::stringstream &is
 
     if (std::filesystem::exists(strOutputPath))
     {
-        PrintLine("Overwriting an existing file!", EMessagePrefix::Warn);
+        // TODO: As user if they want to overwrite instead of just doing it regardless
+        PrintLine("Overwriting an existing file!\nConfirm Overwrite?", EMessagePrefix::Warn);
+        bool bConfirmOverwrite = PromptYesNo();
+        if (!bConfirmOverwrite)
+        {
+            PrintLine("Overwrite Cancelled.");
+            return false;
+        }
     }
 
     std::ofstream ofNewVmtFile(strOutputPath);
@@ -242,6 +301,7 @@ bool CreateVmtFile(const std::string &strExportPath, const std::stringstream &is
 
     ofNewVmtFile << isRestOfVmt.rdbuf();
     ofNewVmtFile.close();
+    PrintLine("File successfully written: " + strOutputPath, EMessagePrefix::Success);
     return true;
 }
 
@@ -312,5 +372,5 @@ int main(int argc, char *argv[])
             PrintLine("Couldn't Open File: " + strInputPath, EMessagePrefix::Err);
         }
     }
-    PrintLine(std::to_string(iSuccessfulFileWrites) + "/" + std::to_string(argc - 1) + " Files Written.");
+    PrintLine("\n" + std::to_string(iSuccessfulFileWrites) + "/" + std::to_string(argc - 1) + " Files Written.");
 }
