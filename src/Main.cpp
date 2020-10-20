@@ -168,11 +168,12 @@ std::string MakeExportPathString(std::filesystem::path inputPath)
 
 // Returns full path with filename and extension
 // e.g. C:/Users/blah/folder/output_file_pcc.vmt
-std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string &strExportPath, const bool &bSuffix = true)
+std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string &strExportPath, const bool &bSuffix)
+
 {
     if (eShaderType == EDetectedShader::LightmappedGeneric)
     {
-        if (bSuffix)
+        if (!bSuffix)
         {
             PrintLine("Exporting PCC (SDK_LightmappedGeneric): " + strExportPath + "_pcc.vmt");
             return strExportPath + "_pcc.vmt";
@@ -185,7 +186,8 @@ std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string 
     }
     if (eShaderType == EDetectedShader::SDK_LightmappedGeneric || eShaderType == EDetectedShader::VertexLitGeneric)
     {
-        if (bSuffix)
+        if (!bSuffix)
+
         {
             PrintLine("Exporting LightmappedGeneric: " + strExportPath + "_lmg.vmt");
             return strExportPath + "_lmg.vmt";
@@ -196,7 +198,6 @@ std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string 
             return strExportPath + ".vmt";
         }
     }
-
     assert(0 && "An invalid shader was passed into the Suffix function!");
     return strExportPath + "_error.vmt";
 }
@@ -246,13 +247,12 @@ bool PromptYesNo()
 // Creates a new VMT file with the first line changed; returns boolean to try and signify this worked as expected
 bool CreateVmtFile(const std::string &strExportPath, const std::stringstream &isRestOfVmt, const EDetectedShader &eShaderType)
 {
-    // TODO: Another spot to ask user for yes/no to set this boolean properly
-    bool bHasSuffix = true;
+    PrintLine("Directly overwrite instead of appending a suffix and creating a new file?");
+    bool bHasSuffix = PromptYesNo();
     std::string strOutputPath = SetFileSuffix(eShaderType, strExportPath, bHasSuffix);
 
-    if (std::filesystem::exists(strOutputPath))
+    if (std::filesystem::exists(strOutputPath) && !bHasSuffix)
     {
-        // TODO: As user if they want to overwrite instead of just doing it regardless
         PrintLine("Overwriting an existing file!\nConfirm Overwrite?", EMessagePrefix::Warn);
         bool bConfirmOverwrite = PromptYesNo();
         if (!bConfirmOverwrite)
@@ -295,7 +295,7 @@ bool CreateVmtFile(const std::string &strExportPath, const std::stringstream &is
         // An unknown shader was passed in so close it firstly then return false to signify error
         ofNewVmtFile.close();
         assert(0 && "An invalid shader was passed into the CreateVmtFile function!");
-        // TODO: Delete this file instead of leaving an invalid/empty one?
+        // Delete this file instead of leaving an invalid/empty one?
         return false;
     }
 
@@ -356,8 +356,6 @@ int main(int argc, char *argv[])
 
             EDetectedShader eFoundShader = DetectFileShader(strFirstLine);
 
-            // TODO: Seems like there's a bit of if() nesting going on
-            // Do all these called functions really need to check as much as they currently are? See CreateVmtFile
             if (eFoundShader != EDetectedShader::None)
             {
                 // CreateVmtFile returns a bool to try and ensure the amount of successful file writes shown is correct
