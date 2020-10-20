@@ -21,7 +21,7 @@
 #include <sstream>
 #include <string>
 
-constexpr auto APPLICATION_TITLE = "VMT Shader Swapping Tool v0.6";
+constexpr auto APPLICATION_TITLE = "VMT Shader Swapping Tool v0.7";
 
 enum class EMessagePrefix
 {
