@@ -138,10 +138,8 @@ EPccOrVlgResponse GetPccOrVlg(const EPccOrVlgResponse &inputType)
             return EPccOrVlgResponse::Vlg;
         }
     }
-    else
-    {
-        return inputType;
-    }
+
+    return inputType;
 }
 
 EDetectedShader DetectFileShader(const std::string &strFirstLine)
