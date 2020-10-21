@@ -23,7 +23,7 @@
 #include <fmt/core.h>
 #include <fmt/color.h>
 
-constexpr auto APPLICATION_TITLE = "VMT Shader Swapping Tool v0.7";
+constexpr auto APPLICATION_TITLE = "VMT Shader Swapping Tool v0.7b";
 
 enum class EMessagePrefix
 {
