@@ -179,25 +179,44 @@ std::string MakeExportPathString(std::filesystem::path inputPath)
 
 // Returns full path with filename and extension
 // e.g. C:/Users/blah/folder/output_file_pcc.vmt
-std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string &strExportPath, const bool &bSuffix)
+std::string SetFileSuffix(const EDetectedShader &eShaderType, const std::string &strExportPath, const bool &bDirectOverwrite, const EPccOrVlgResponse &eMode)
 {
     if (eShaderType == EDetectedShader::LightmappedGeneric)
     {
-        if (!bSuffix)
+        if (eMode == EPccOrVlgResponse::Pcc)
         {
-            PrintLine("Exporting Parallax-Corrected Cubemap (SDK_LightmappedGeneric): " + strExportPath + "_pcc.vmt", EMessagePrefix::Info);
-            return strExportPath + "_pcc.vmt";
+            if (!bDirectOverwrite)
+            {
+                PrintLine("Exporting Parallax-Corrected Cubemap (SDK_LightmappedGeneric): " + strExportPath + "_pcc.vmt",
+                          EMessagePrefix::Info);
+                return strExportPath + "_pcc.vmt";
+            }
+            else
+            {
+                PrintLine("Overwriting as Parallax-Corrected Cubemaps (SDK_LightmappedGeneric): " + strExportPath + ".vmt",
+                          EMessagePrefix::Info);
+                return strExportPath + ".vmt";
+            }
         }
+        // If not PCC, then it must be VertexLitGeneric...
         else
         {
-            PrintLine("Overwriting as Parallax-Corrected Cubemaps (SDK_LightmappedGeneric): " + strExportPath + ".vmt", EMessagePrefix::Info);
-            return strExportPath + ".vmt";
+            if (!bDirectOverwrite)
+            {
+                PrintLine("Exporting VertexLitGeneric: " + strExportPath + "_vlg.vmt", EMessagePrefix::Info);
+                return strExportPath + "_vlg.vmt";
+            }
+            else
+            {
+                PrintLine("Overwriting as VertexLitGeneric: " + strExportPath + ".vmt", EMessagePrefix::Info);
+                return strExportPath + ".vmt";
+            }
         }
     }
 
     if (eShaderType == EDetectedShader::SDK_LightmappedGeneric || eShaderType == EDetectedShader::VertexLitGeneric)
     {
-        if (!bSuffix)
+        if (!bDirectOverwrite)
 
         {
             PrintLine("Exporting LightmappedGeneric: " + strExportPath + "_lmg.vmt", EMessagePrefix::Info);
@@ -262,9 +281,17 @@ bool PromptYesNo()
 // Creates a new VMT file with the first line changed; returns boolean to try and signify this worked as expected
 bool CreateVmtFile(const std::string &strExportPath, const std::stringstream &isRestOfVmt, const EDetectedShader &eShaderType)
 {
+    // Static mode of operation that persists between calls
+    // eMode is used to see if PCC or VLG is in "don't ask again" mode
+    static EPccOrVlgResponse eMode = EPccOrVlgResponse::None;
+    eMode = CheckLmgMode(eMode);
+
+    // Then get the regular version if it's not already not a "don't ask again" variant
+    EPccOrVlgResponse eResponse = GetPccOrVlg(eMode);
+    
     PrintLine("Directly overwrite instead of appending a suffix and creating a new file?");
     bool bHasSuffix = PromptYesNo();
-    std::string strOutputPath = SetFileSuffix(eShaderType, strExportPath, bHasSuffix);
+    std::string strOutputPath = SetFileSuffix(eShaderType, strExportPath, bHasSuffix, eResponse);
 
     if (std::filesystem::exists(strOutputPath) && !bHasSuffix)
     {
@@ -282,14 +309,6 @@ bool CreateVmtFile(const std::string &strExportPath, const std::stringstream &is
 
     if (eShaderType == EDetectedShader::LightmappedGeneric)
     {
-        // Static mode of operation that persists between calls
-        // eMode is used to see if PCC or VLG is in "don't ask again" mode
-        static EPccOrVlgResponse eMode = EPccOrVlgResponse::None;
-        eMode = CheckLmgMode(eMode);
-
-        // Then get the regular version if it's not already not a "don't ask again" variant
-        EPccOrVlgResponse eResponse = GetPccOrVlg(eMode);
-
         if (eResponse == EPccOrVlgResponse::Pcc)
         {
             ofNewVmtFile << "\"SDK_LightmappedGeneric\"\n";
