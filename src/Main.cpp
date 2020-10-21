@@ -114,6 +114,10 @@ EPccOrVlgResponse PromptLmgMode()
 
 EPccOrVlgResponse CheckLmgMode(const EPccOrVlgResponse &inputMode)
 {
+    if (inputMode == EPccOrVlgResponse::Pcc || inputMode == EPccOrVlgResponse::Vlg)
+    {
+        return PromptLmgMode();
+    }
     if (inputMode != EPccOrVlgResponse::None)
     {
         return inputMode;
@@ -280,7 +284,9 @@ bool CreateVmtFile(const std::string &strExportPath, const std::stringstream &is
     {
         // Static mode of operation that persists between calls
         // eMode is used to see if PCC or VLG is in "don't ask again" mode
-        static EPccOrVlgResponse eMode = CheckLmgMode(eMode);
+        static EPccOrVlgResponse eMode = EPccOrVlgResponse::None;
+        eMode = CheckLmgMode(eMode);
+
         // Then get the regular version if it's not already not a "don't ask again" variant
         EPccOrVlgResponse eResponse = GetPccOrVlg(eMode);
 
