@@ -13,3 +13,4 @@ The tool will simply add a corresponding suffix the new VMT file to distinguish 
 | ---------------------------|---------------|
 | Parallax-Corrected Cubemap | `_pcc`        |
 | LightmappedGeneric         | `_lmg`        |
+| VertexLitGeneric           | `_vlg`        |
